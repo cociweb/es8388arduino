@@ -47,7 +47,7 @@ void setup() {
   es8388.setOutputVolume(volume);
   es8388.mixerSourceSelect(MIXADC, MIXADC);
   es8388.mixerSourceControl(DACOUT);
-  bool pf = es8388.pub_write_reg(0x09, 0x00); // mutes onboard microphones and highly reduces distortion
+  bool pf = es8388.pub_write_reg(0x09, 0x00); // mutes onboard microphones (a bit) and highly reduces distortion
   
   uint8_t *reg;
   for (uint8_t i = 0; i < 53; i++) {
