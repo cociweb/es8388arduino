@@ -70,6 +70,13 @@ ES8388::ES8388(uint8_t _sda, uint8_t _scl, uint32_t _speed) {
 
 ES8388::~ES8388() { i2c.~TwoWire(); }
 
+bool ES8388::pub_write_reg(uint8_t reg_add, uint8_t data) {  // [perlix] public version of write_reg
+  i2c.beginTransmission(ES8388_ADDR);  
+  i2c.write(reg_add);              
+  i2c.write(data);              
+  return i2c.endTransmission() == 0;
+}
+
 bool ES8388::write_reg(uint8_t reg_add, uint8_t data) {
   i2c.beginTransmission(ES8388_ADDR);
   i2c.write(reg_add);
