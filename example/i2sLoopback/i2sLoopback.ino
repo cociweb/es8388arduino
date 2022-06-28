@@ -8,7 +8,7 @@ ES8388 es8388(33, 32, 400000);
 
 uint32_t timeLapsed, ledTick;
 uint8_t volume = 12;
-uint16_t rxbuf[256], txbuf[256];
+uint16_t rxbuf[512];
 
 i2s_config_t i2s_config = {
     .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX | I2S_MODE_RX),
@@ -18,7 +18,7 @@ i2s_config_t i2s_config = {
     .communication_format = I2S_COMM_FORMAT_I2S,
     .intr_alloc_flags = 0,
     .dma_buf_count = 8,
-    .dma_buf_len = 256,
+    .dma_buf_len = 512,
     .use_apll = false,
     .tx_desc_auto_clear = true,
     .fixed_mclk = 0};
@@ -47,6 +47,8 @@ void setup() {
   es8388.setOutputVolume(volume);
   es8388.mixerSourceSelect(MIXADC, MIXADC);
   es8388.mixerSourceControl(DACOUT);
+  bool pf = es8388.pub_write_reg(0x09, 0x00); // mutes onboard microphones and highly reduces distortion
+  
   uint8_t *reg;
   for (uint8_t i = 0; i < 53; i++) {
     reg = es8388.readAllReg();
@@ -58,16 +60,13 @@ void setup() {
   WRITE_PERI_REG(PIN_CTRL, 0xFFF0);
   i2s_driver_install(I2S_NUM_0, &i2s_config, 0, NULL);
   i2s_set_pin(I2S_NUM_0, &pin_config);
+  i2s_set_sample_rates(I2S_NUM_0, 16000); // 16000 further reduces distortion, retaining acceptable quality 
 }
 
 void loop() {
-  // read 256 samples (128 stereo samples)
-  i2s_read(I2S_NUM_0, &rxbuf[0], 256 * 2, &readsize, 1000);
-  for (int i = 0; i < 256; i++) {
-    // direct transfer too txbuff
-    txbuf[i] = rxbuf[i];
-    // txbuf[i] = 0; //mute
-  }
-  // play received buffer
-  i2s_write(I2S_NUM_0, &txbuf[0], 256 * 2, &readsize, 1000);
+  // read 512 samples (128 stereo samples)
+  i2s_read(I2S_NUM_0, &rxbuf[0], 512 * 2, &readsize, 1000);
+  
+  // play buffer
+  i2s_write(I2S_NUM_0, &rxbuf[0], 512 * 2, &readsize, 1000);
 }
