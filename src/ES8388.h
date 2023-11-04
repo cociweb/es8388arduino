@@ -50,6 +50,7 @@ class ES8388 {
   bool read_reg(uint8_t reg_add, uint8_t& data);
 
  public:
+  bool pub_write_reg(uint8_t reg_add, uint8_t data);
   ES8388(uint8_t _sda, uint8_t _scl, uint32_t _speed);
   ~ES8388();
   bool init();
